@@ -7,59 +7,63 @@ use Illuminate\Http\Request;
 
 class VoitureController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function liste()
     {
-        //
+        $voitures = Voiture::all();
+        return view('voiture.index', compact('voitures'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function creerVoiture()
     {
-        //
+        return view('voiture.creer');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function enregistrerVoiture(Request $request)
     {
-        //
+        $request->validate([
+            'marque' => 'required|string|max:255',
+            'modele' => 'required|string|max:255',
+            'annee' => 'required|integer|min:1900|max:' . date('Y'),
+        ]);
+
+        $voiture = new Voiture();
+        $voiture->marque = htmlspecialchars($request->marque);
+        $voiture->modele = htmlspecialchars($request->modele);
+        $voiture->annee = $request->annee;
+        $voiture->save();
+
+        return redirect('voitures')->with('status', 'Voiture enregistrée avec succès.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Voiture $voiture)
+    public function editerVoiture($id)
     {
-        //
+        $voiture = Voiture::findOrFail($id);
+        return view('voiture.edit', compact('voiture'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Voiture $voiture)
+    public function updateVoiture(Request $request)
     {
-        //
+        $request->validate([
+            'id' => 'required|exists:voitures,id',
+            'marque' => 'required|string|max:255',
+            'modele' => 'required|string|max:255',
+            'annee' => 'required|integer|min:1900|max:' . date('Y'),
+        ]);
+
+        $voiture = Voiture::findOrFail($request->id);
+        $voiture->marque = htmlspecialchars($request->marque);
+        $voiture->modele = htmlspecialchars($request->modele);
+        $voiture->annee = $request->annee;
+        $voiture->save();
+
+        return redirect('voitures')->with('status', 'Voiture mise à jour avec succès.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Voiture $voiture)
+    public function supprimerVoiture($id)
     {
-        //
-    }
+        $voiture = Voiture::findOrFail($id);
+        $voiture->delete();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Voiture $voiture)
-    {
-        //
+        return redirect('voitures')->with('status', 'Voiture supprimée avec succès.');
     }
 }
