@@ -70,9 +70,10 @@ class EtudiantController extends Controller
     //supprime un etudiant
     public function supprimerEtudiant($id)
     {
-        $etudiant = Etudiant::findOrFail($id); //verifie l'existence
+        $etudiant = Etudiant::find($id); //verifie l'existence
         $etudiant->delete(); //supprime de la BDD
 
         return redirect('etudiants')->with('status', 'Étudiant supprimé avec succès.');
     }
 }
+//supprimer un etudiant 
