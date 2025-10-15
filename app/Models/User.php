@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany; // Import pour la relation
 
 class User extends Authenticatable
 {
@@ -44,5 +45,14 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Get the accounts (comptes) associated with the user.
+     * Un utilisateur peut avoir plusieurs comptes.
+     */
+    public function comptes(): HasMany
+    {
+        return $this->hasMany(Compte::class);
     }
 }
