@@ -76,12 +76,28 @@ class Transfert extends Model
         $source = $this->compteSource();
         $destination = $this->compteDestination();
 
-        // Vérifie que les comptes existent et que le retrait est possible
-        if ($source && $destination && $source->retirer($this->montant)) {
-            $destination->deposer($this->montant);
-            return true;
+        // Vérifie que les comptes existent
+        if (!$source || !$destination) {
+            return false;
         }
 
-        return false; // Échec du transfert
+        // Vérifie que le compte source appartient bien à l'utilisateur
+        if ($source->user_id !== $this->user_id) {
+            return false;
+        }
+
+        // Vérifie que le solde est suffisant (avec précision décimale)
+        if (floatval($source->solde) < floatval($this->montant)) {
+            return false;
+        }
+
+        // Effectue le transfert
+        $source->solde = floatval($source->solde) - floatval($this->montant);
+        $source->save();
+
+        $destination->solde = floatval($destination->solde) + floatval($this->montant);
+        $destination->save();
+
+        return true;
     }
 }
