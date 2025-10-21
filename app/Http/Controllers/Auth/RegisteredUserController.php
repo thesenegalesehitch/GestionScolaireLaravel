@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Compte;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -39,6 +40,13 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+        ]);
+
+        // Créer automatiquement un compte bancaire pour le nouvel utilisateur
+        Compte::create([
+            'rib' => Compte::generateUniqueRib(),
+            'user_id' => $user->id,
+            'solde' => 0.00, // Solde initial à 0
         ]);
 
         event(new Registered($user));
