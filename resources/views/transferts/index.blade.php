@@ -42,7 +42,7 @@
                                         <br><small class="text-muted">{{ $transfert->contact_email }}</small>
                                     @endif
                                 </td>
-                                <td><strong>{{ number_format($transfert->montant, 2) }} €</strong></td>
+                                <td><strong>{{ number_format($transfert->montant, 0, ',', ' ') }} FCFA</strong></td>
                                 <td>{{ $transfert->rib_source }}</td>
                                 <td>
                                     <span class="badge bg-success">Effectué</span>

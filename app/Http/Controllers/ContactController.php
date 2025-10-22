@@ -7,10 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
-/**
- * Contrôleur ContactController - Gère les contacts bancaires de l'utilisateur
- * Permet la gestion CRUD des contacts pour faciliter les transferts
- */
+
 class ContactController extends Controller
 {
     /**
@@ -21,7 +18,7 @@ class ContactController extends Controller
      */
     public function index(): View
     {
-        $contacts = auth()->user()->contacts; // Récupère uniquement les contacts de l'utilisateur
+        $contacts = auth()->user()->contacts;
         return view('contacts.index', compact('contacts'));
     }
 
@@ -45,24 +42,19 @@ class ContactController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        // Validation des données d'entrée
         $validated = $request->validate([
-            'first_name' => 'required|string|max:255',     // Prénom obligatoire
-            'last_name' => 'required|string|max:255',      // Nom obligatoire
-            'phone' => 'nullable|string|max:20',           // Téléphone optionnel
-            'address' => 'nullable|string|max:500'         // Adresse optionnelle
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:500'
         ]);
 
-        // Associe le contact à l'utilisateur connecté
         $validated['user_id'] = auth()->id();
 
-        // Génère un RIB unique
         $validated['rib'] = Contact::generateUniqueRib();
 
-        // Création du contact
         Contact::create($validated);
 
-        // Redirection avec message de succès
         return redirect()->route('contacts.index')->with('success', 'Contact ajouté avec succès');
     }
 
@@ -75,7 +67,6 @@ class ContactController extends Controller
      */
     public function show(int $id): View
     {
-        // Vérifie que le contact appartient bien à l'utilisateur connecté
         $contact = Contact::where('user_id', auth()->id())->findOrFail($id);
         return view('contacts.show', compact('contact'));
     }
@@ -89,7 +80,6 @@ class ContactController extends Controller
      */
     public function edit(int $id): View
     {
-        // Vérifie que le contact appartient bien à l'utilisateur connecté
         $contact = Contact::where('user_id', auth()->id())->findOrFail($id);
         return view('contacts.edit', compact('contact'));
     }
@@ -104,10 +94,8 @@ class ContactController extends Controller
      */
     public function update(Request $request, int $id): RedirectResponse
     {
-        // Vérifie que le contact appartient bien à l'utilisateur connecté
         $contact = Contact::where('user_id', auth()->id())->findOrFail($id);
 
-        // Validation des données d'entrée
         $validated = $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
@@ -115,10 +103,8 @@ class ContactController extends Controller
             'address' => 'nullable|string|max:500'
         ]);
 
-        // Mise à jour du contact
         $contact->update($validated);
 
-        // Redirection avec message de succès
         return redirect()->route('contacts.index')->with('success', 'Contact modifié avec succès');
     }
 
@@ -131,11 +117,9 @@ class ContactController extends Controller
      */
     public function destroy(int $id): RedirectResponse
     {
-        // Vérifie que le contact appartient bien à l'utilisateur connecté
         $contact = Contact::where('user_id', auth()->id())->findOrFail($id);
         $contact->delete();
 
-        // Redirection avec message de succès
         return redirect()->route('contacts.index')->with('success', 'Contact supprimé avec succès');
     }
 }

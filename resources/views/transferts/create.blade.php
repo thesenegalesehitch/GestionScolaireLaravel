@@ -13,17 +13,20 @@
                         @csrf
 
                         <div class="mb-3">
-                            <label for="rib_source" class="form-label">Compte source</label>
-                            <select name="rib_source" id="rib_source" class="form-control" required>
-                                <option value="">Sélectionnez un compte</option>
-                                @foreach($comptes as $compte)
-                                    <option value="{{ $compte->rib }}"
-                                            {{ ($compteSource && $compteSource->id == $compte->id) ? 'selected' : '' }}>
-                                        {{ $compte->rib }} (Solde: {{ number_format($compte->solde, 2) }} €)
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('rib_source') <div class="text-danger">{{ $message }}</div> @enderror
+                            <label class="form-label">Compte source</label>
+                            <div class="form-control bg-light">
+                                @if($compteSource)
+                                    {{ $compteSource->rib }} (Solde: {{ number_format($compteSource->solde, 0, ',', ' ') }} FCFA)
+                                    <input type="hidden" name="rib_source" value="{{ $compteSource->rib }}">
+                                @else
+                                    @php $defaultCompte = $comptes->first(); @endphp
+                                    {{ $defaultCompte->rib }} (Solde: {{ number_format($defaultCompte->solde, 0, ',', ' ') }} FCFA)
+                                    <input type="hidden" name="rib_source" value="{{ $defaultCompte->rib }}">
+                                @endif
+                            </div>
+                            <div class="form-text">
+                                <small>Le compte source est automatiquement sélectionné.</small>
+                            </div>
                         </div>
 
                         <!-- Sélection du contact destinataire -->
@@ -72,9 +75,9 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="montant" class="form-label">Montant (€) <span class="text-danger">*</span></label>
-                            <input type="number" step="0.01" name="montant" id="montant" class="form-control @error('montant') is-invalid @enderror"
-                                   value="{{ old('montant') }}" min="0.01" required>
+                            <label for="montant" class="form-label">Montant (FCFA) <span class="text-danger">*</span></label>
+                            <input type="number" step="1" name="montant" id="montant" class="form-control @error('montant') is-invalid @enderror"
+                                   value="{{ old('montant') }}" min="1" required>
                             @error('montant')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror

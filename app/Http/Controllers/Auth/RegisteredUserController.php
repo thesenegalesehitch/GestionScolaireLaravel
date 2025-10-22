@@ -42,11 +42,10 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        // Créer automatiquement un compte bancaire pour le nouvel utilisateur
         Compte::create([
             'rib' => Compte::generateUniqueRib(),
             'user_id' => $user->id,
-            'solde' => 0.00, // Solde initial à 0
+            'solde' => 0.00,
         ]);
 
         event(new Registered($user));

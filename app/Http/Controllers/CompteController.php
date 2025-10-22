@@ -22,7 +22,7 @@ class CompteController extends Controller
      */
     public function index(): View
     {
-        $comptes = auth()->user()->comptes; // Récupère uniquement les comptes de l'utilisateur
+        $comptes = auth()->user()->comptes;
         return view('comptes.index', compact('comptes'));
     }
 
@@ -46,18 +46,14 @@ class CompteController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        // Validation des données d'entrée
         $validated = $request->validate([
-            'rib' => 'required|string|max:30|unique:comptes,rib', // RIB unique obligatoire
+            'rib' => 'required|string|max:30|unique:comptes,rib',
         ]);
 
-        // Associe le compte à l'utilisateur connecté
         $validated['user_id'] = auth()->id();
 
-        // Création du compte
         Compte::create($validated);
 
-        // Redirection avec message de succès
         return redirect()->route('comptes.index')->with('success', 'Compte créé avec succès');
     }
 
@@ -70,7 +66,6 @@ class CompteController extends Controller
      */
     public function show(int $id): View
     {
-        // Vérifie que le compte appartient bien à l'utilisateur connecté
         $compte = Compte::where('user_id', auth()->id())->findOrFail($id);
         return view('comptes.show', compact('compte'));
     }
@@ -85,18 +80,14 @@ class CompteController extends Controller
      */
     public function deposer(Request $request, int $id): RedirectResponse
     {
-        // Validation du montant
         $validated = $request->validate([
-            'montant' => 'required|numeric|min:0.01', // Montant positif requis
+            'montant' => 'required|numeric|min:0.01',
         ]);
 
-        // Récupération et vérification du compte
         $compte = Compte::where('user_id', auth()->id())->findOrFail($id);
 
-        // Effectue le dépôt
         $compte->deposer($validated['montant']);
 
-        // Redirection avec message de succès
         return redirect()->route('comptes.show', $compte)->with('success', 'Dépôt effectué avec succès');
     }
 

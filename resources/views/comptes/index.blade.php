@@ -20,7 +20,7 @@
                     </div>
                     <div class="card-body">
                         <p class="card-text">
-                            <strong>Solde:</strong> {{ number_format($compte->solde, 2) }} €
+                            <strong>Solde:</strong> {{ number_format($compte->solde, 0, ',', ' ') }} FCFA
                         </p>
                         <div class="d-flex gap-2">
                             <a href="{{ route('comptes.show', $compte) }}" class="btn btn-info btn-sm">Voir détails</a>
@@ -42,8 +42,8 @@
                             @csrf
                             <div class="modal-body">
                                 <div class="mb-3">
-                                    <label class="form-label">Montant (€)</label>
-                                    <input type="number" name="montant" class="form-control" step="0.01" min="0.01" required>
+                                    <label class="form-label">Montant (FCFA)</label>
+                                    <input type="number" name="montant" class="form-control" step="1" min="1" required>
                                 </div>
                             </div>
                             <div class="modal-footer">

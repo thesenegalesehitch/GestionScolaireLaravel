@@ -58,7 +58,7 @@
                     @foreach(auth()->user()->comptes as $compte)
                     <div class="text-center">
                         <h6 class="text-muted">{{ $compte->rib }}</h6>
-                        <h2 class="text-success mb-0">{{ number_format($compte->solde, 2) }} €</h2>
+                        <h2 class="text-success mb-0">{{ number_format($compte->solde, 0, ',', ' ') }} FCFA</h2>
                         <small class="text-muted">Solde disponible</small>
                     </div>
                     @endforeach

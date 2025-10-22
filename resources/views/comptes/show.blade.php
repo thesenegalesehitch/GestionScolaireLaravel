@@ -13,11 +13,14 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-sm-6">
+                        <div class="col-sm-4">
                             <p><strong>RIB:</strong> {{ $compte->rib }}</p>
                         </div>
-                        <div class="col-sm-6">
-                            <p><strong>Solde actuel:</strong> <span class="h5 text-success">{{ number_format($compte->solde, 2) }} €</span></p>
+                        <div class="col-sm-4">
+                            <p><strong>Propriétaire:</strong> {{ $compte->user->name }}</p>
+                        </div>
+                        <div class="col-sm-4">
+                            <p><strong>Solde actuel:</strong> <span class="h5 text-success">{{ number_format($compte->solde, 0, ',', ' ') }} FCFA</span></p>
                         </div>
                     </div>
 
@@ -62,8 +65,8 @@
                     @csrf
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label class="form-label">Montant (€)</label>
-                            <input type="number" name="montant" class="form-control" step="0.01" min="0.01" required>
+                            <label class="form-label">Montant (FCFA)</label>
+                            <input type="number" name="montant" class="form-control" step="1" min="1" required>
                         </div>
                     </div>
                     <div class="modal-footer">

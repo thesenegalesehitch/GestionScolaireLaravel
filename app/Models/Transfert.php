@@ -4,99 +4,75 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Log;
 
-/**
- * Modèle Transfert - Représente un transfert d'argent entre comptes
- * Gère l'exécution des transferts avec vérification des soldes
- */
 class Transfert extends Model
 {
-    /**
-     * Attributs qui peuvent être assignés en masse
-     * @var array
-     */
     protected $fillable = [
-        'montant',         // Montant du transfert
-        'rib_source',      // RIB du compte source
-        'rib_destination', // RIB du compte destination
-        'user_id',         // ID de l'utilisateur effectuant le transfert
-        'contact_name',    // Nom du destinataire (optionnel)
-        'contact_email',   // Email du destinataire (optionnel)
+        'montant',
+        'rib_source',
+        'rib_destination',
+        'user_id',
+        'contact_name',
+        'contact_email',
     ];
 
-    /**
-     * Conversion automatique des types d'attributs
-     * @var array
-     */
     protected $casts = [
-        'montant' => 'decimal:2', // Précision de 2 décimales pour les montants
+        'montant' => 'decimal:2',
     ];
 
-    /**
-     * Relation Many-to-One avec User
-     * Un transfert appartient à un utilisateur
-     *
-     * @return BelongsTo
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Récupère le compte source du transfert
-     * Recherche le compte par son RIB
-     *
-     * @return Compte|null
-     */
     public function compteSource()
     {
         return Compte::where('rib', $this->rib_source)->first();
     }
 
-    /**
-     * Récupère le compte destination du transfert
-     * Recherche le compte par son RIB
-     *
-     * @return Compte|null
-     */
     public function compteDestination()
     {
         return Compte::where('rib', $this->rib_destination)->first();
     }
 
-    /**
-     * Exécute le transfert d'argent
-     * Vérifie les soldes et effectue les opérations de débit/crédit
-     *
-     * @return bool True si le transfert a réussi, false sinon
-     */
     public function execute()
     {
         $source = $this->compteSource();
         $destination = $this->compteDestination();
 
-        // Vérifie que les comptes existent
+        Log::info('Transfert execute - Source RIB: ' . $this->rib_source . ', Destination RIB: ' . $this->rib_destination);
+        Log::info('Source account: ' . ($source ? 'Found (ID: ' . $source->id . ', Solde: ' . $source->solde . ')' : 'Not found'));
+        Log::info('Destination account: ' . ($destination ? 'Found (ID: ' . $destination->id . ', Solde: ' . $destination->solde . ')' : 'Not found'));
+        Log::info('Transfer amount: ' . $this->montant . ', Source user_id: ' . ($source ? $source->user_id : 'N/A') . ', Transfer user_id: ' . $this->user_id);
+
         if (!$source || !$destination) {
+            Log::error('Transfert failed: Source or destination account not found');
             return false;
         }
 
-        // Vérifie que le compte source appartient bien à l'utilisateur
         if ($source->user_id !== $this->user_id) {
+            Log::error('Transfert failed: Source account does not belong to user');
             return false;
         }
 
-        // Vérifie que le solde est suffisant (avec précision décimale)
-        if (floatval($source->solde) < floatval($this->montant)) {
+        $sourceSolde = floatval($source->solde);
+        $transferAmount = floatval($this->montant);
+
+        Log::info('Balance check: Source solde ' . $sourceSolde . ' vs transfer amount ' . $transferAmount);
+
+        if ($sourceSolde < $transferAmount) {
+            Log::error('Transfert failed: Insufficient balance');
             return false;
         }
 
-        // Effectue le transfert
-        $source->solde = floatval($source->solde) - floatval($this->montant);
+        $source->solde = $sourceSolde - $transferAmount;
         $source->save();
 
-        $destination->solde = floatval($destination->solde) + floatval($this->montant);
+        $destination->solde = floatval($destination->solde) + $transferAmount;
         $destination->save();
+
+        Log::info('Transfert successful: New source solde: ' . $source->solde . ', New destination solde: ' . $destination->solde);
 
         return true;
     }
